@@ -10,8 +10,9 @@ I implemented this model for my experiments.
 
 Requirements
 ------------------------
-pytorch 1.7
-tensorboard_logger 
+- pytorch 1.7
+
+- tensorboard_logger 
 
 
 Dataset Preparation 
