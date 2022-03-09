@@ -10,9 +10,15 @@ I implemented this model for my experiments.
 
 Requirements
 ------------------------
+pytorch 1.7
+tensorboard_logger 
+
 
 Dataset Preparation 
 ------------------------
+[See this section](https://github.com/khm159/MSCNet/blob/main/data/DataPreparation.md)
+
 
 Model Training 
 ------------------------
+Training log and pre-trained checkpoint will be uploaded soon. 
