@@ -1,0 +1,4 @@
+## IGNORE LIST ##
+data/stanford40/ImageSplits
+data/stanford40/JPEGImages
+data/stanford40/XMLAnnotations
