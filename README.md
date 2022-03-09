@@ -2,7 +2,7 @@
 
 This repo is the un-official pytorch implementation of the MSCNet 
 
-![figure](https://github.com/khm159/MSCNet/fig.png)
+![figure](https://github.com/khm159/MSCNet/fig.PNG)
 
 from the "Human action recognition by multiple spatial clues network", neurocomputing, 2022"
 
