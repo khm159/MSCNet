@@ -66,7 +66,9 @@ def main_worker():
             model = scg_model,
             train_loader = train_loader,
             criterion = criterion,
-            optimizer = optimizer
+            optimizer = optimizer,
+            epoch = epoch,
+            num_epoch = num_epoch, 
         )
         val_top1 = validate_SCG(
             model = scg_model,
@@ -97,7 +99,6 @@ def main_worker():
     # calculate mAP 
     print(" Training Finished!")
     print(" - Best Validation Score: {:.2f}%".format(best_score))
-    print(" Calculate Precision...")
     test(scg_model,opt.dataset)
 
 if __name__ == "__main__":

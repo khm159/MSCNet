@@ -2,7 +2,7 @@ import torch
 import tensorboard_logger
 from utils import AverageMeter, accuracy 
 
-def train_SCG(model, train_loader, criterion, optimizer):
+def train_SCG(model, train_loader, criterion, optimizer, epoch, num_epoch):
 
     model.train()
     semantic_top1  = AverageMeter()
@@ -20,9 +20,9 @@ def train_SCG(model, train_loader, criterion, optimizer):
         data = data.reshape([batch*crop,chan,w,h])
 
         # device check
-        #if torch.cuda.is_available():
-        #    data   = data.cuda()
-        #    target = target.cuda()
+        if torch.cuda.is_available():
+            data   = data.cuda()
+            target = target.cuda()
         
         optimizer.zero_grad()
 
@@ -50,7 +50,11 @@ def train_SCG(model, train_loader, criterion, optimizer):
         semantic_top1.update(sem_prec1.item(), batch*crop)
         attention_top1.update(att_prec1.item(), batch*crop)
         train_loss.update(loss.item(),batch*crop)
-    
+
+        if batch_idx % 20 == 0:
+            print('Epoch [{}/{}] Batch [{}/{}] Loss: {:.4f} Semantic_Loss: {:.4f} Attention_Loss: {:.4f} Semantic_Top@1: {:.4f} Attention_Top@1: {:.4f}'.format(
+                epoch, num_epoch, batch_idx, len(train_loader), loss.item(), loss_pred.item(), loss_att.item(), sem_prec1.item(), att_prec1.item()))
+
     tensorboard_logger.log_value('loss_semantic_branch',semantic_loss.avg)
     tensorboard_logger.log_value('loss_attention_branch',attention_loss.avg)
     tensorboard_logger.log_value('train_top1_semantic',semantic_top1.avg)
@@ -101,7 +105,10 @@ def validate_SCG(model, test_loader, criterion):
             semantic_top1.update(sem_prec1.item(), batch*crop)
             attention_top1.update(att_prec1.item(), batch*crop)
             eval_loss.update(loss.item(),batch*crop)
-    
+
+    print('Test Result : Loss: {:.4f} Semantic_Loss: {:.4f} Attention_Loss: {:.4f} Semantic_Top@1: {:.4f} Attention_Top@1: {:.4f}'.format(
+        loss.item(), loss_pred.item(), loss_att.item(), sem_prec1.item(), att_prec1.item()))
+
     tensorboard_logger.log_value('loss_semantic_branch',semantic_loss.avg)
     tensorboard_logger.log_value('loss_attention_branch',attention_loss.avg)
     tensorboard_logger.log_value('train_top1_semantic',semantic_top1.avg)
