@@ -1,5 +1,5 @@
 ## IGNORE LIST ##
-data/stanford40/ImageSplits
-data/stanford40/JPEGImages
-data/stanford40/XMLAnnotations
+data/stanford40/JPEGImages/*.jpg
+data/stanford40/JPEGImages/*.JPG
+data/stanford40/Stanford40_JPEGImages.zip
 work_dir/
