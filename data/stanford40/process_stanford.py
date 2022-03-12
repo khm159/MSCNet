@@ -52,16 +52,16 @@ def process_stanford40_bm():
     # load train list 
     train_list = load_txt_from_path('./ImageSplits/'+act+'_train.txt')
     # load test list 
-    train_list = load_txt_from_path('./ImageSplits/'+act+'_test.txt')
+    test_list = load_txt_from_path('./ImageSplits/'+act+'_test.txt')
 
     if act in body_actions:
       # body motion labels
       appending_data(train_list, body_train_out, lbl_num)
-      appending_data(train_list, body_test_out, lbl_num)
+      appending_data(test_list, body_test_out, lbl_num)
     else:
       # non body-motion labels
       appending_data(train_list, non_body_train_out, lbl_num)
-      appending_data(train_list, non_body_test_out, lbl_num)
+      appending_data(test_list, non_body_test_out, lbl_num)
     
 if __name__ =="__main__":
     process_stanford40()
