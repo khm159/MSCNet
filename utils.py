@@ -33,6 +33,20 @@ def check_dirs_SCG(opt):
 
   return expdir, logdir, ckptdir
 
+def get_test_augmentor_SCG():
+  import torchvision.transforms as transforms 
+  normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                    std=[0.229, 0.224, 0.225])
+  test_augmentor = transforms.Compose([
+    transforms.Resize(opt.reshape_size),
+    transforms.TenCrop(opt.crop_size),
+    transforms.Lambda(lambda crops: [transforms.ToTensor()(crop) for crop in crops]),
+    transforms.Lambda(lambda crops: [normalize(crop) for crop in crops]),
+    transforms.Lambda(lambda crops: torch.stack(crops))
+  ])
+
+  return test_augmentor
+
 def get_augmentor_SCG(opt):
   """
   parsing exp condition and return train/test augmentor 
@@ -67,6 +81,31 @@ def get_augmentor_SCG(opt):
     transforms.Lambda(lambda crops: torch.stack(crops))
   ])
   return train_augmentor, test_augmentor
+
+
+def get_test_loader(dataset_name):
+  from dataset import ImageAR_Dataset
+  from torch.utils.data import DataLoader
+
+  _, image_root, _, test_list_path = \
+  get_dataset_info(dataset_name)
+
+  test_augmentor = get_test_augmentor_SCG()
+
+  # Get Dataset and Data loader
+  test_dataset = ImageAR_Dataset(
+    image_list = test_list_path,
+    image_root = image_root,
+    transform = test_augmentor
+  )
+  test_loader = DataLoader(
+    dataset     = test_dataset,
+    batch_size  = 1,
+    shuffle     = False,
+    num_workers = 4,
+    pin_memory  = True
+  )
+  return test_loader
 
 def get_loaders(
   train_list, 

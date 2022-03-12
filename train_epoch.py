@@ -29,27 +29,30 @@ def train_SCG(model, train_loader, criterion, optimizer, epoch, num_epoch):
         # calculate output 
         pred, pred_att = model(data)
 
-        # get loss 
-        loss_pred = criterion(pred, target)
-        loss_att  = criterion(pred_att, target)
-        loss = loss_pred + loss_att
-
         # ensemble and get accuracy 
+        target = target.reshape ([batch, crop,-1])
+        target = target.mean(dim=1)
         pred_logits     = softmax(pred.reshape([batch,crop,-1]))
         pred_att_logits = softmax(pred_att.reshape([batch,crop,-1]))
         pred_logits     = pred_logits.mean(dim=1).squeeze(1)
         pred_att_logits = pred_att_logits.mean(dim=1).squeeze(1)
+
         sem_prec1, _    = accuracy(pred.data, target, topk=(1, 5))
         att_prec1, _    = accuracy(pred_att.data, target, topk=(1, 5))
+
+        # get loss 
+        loss_pred = criterion(pred, target)
+        loss_att  = criterion(pred_att, target)
+        loss = loss_pred + loss_att
         
         loss.backward()
         optimizer.step()
 
-        semantic_loss.update(loss_pred.item(), batch*crop)
-        attention_loss.update(loss_att.item(), batch*crop)
-        semantic_top1.update(sem_prec1.item(), batch*crop)
-        attention_top1.update(att_prec1.item(), batch*crop)
-        train_loss.update(loss.item(),batch*crop)
+        semantic_loss.update(loss_pred.item(), batch)
+        attention_loss.update(loss_att.item(), batch)
+        semantic_top1.update(sem_prec1.item(), batch)
+        attention_top1.update(att_prec1.item(), batch)
+        train_loss.update(loss.item(),batch)
 
         if batch_idx % 20 == 0:
             print('Epoch [{}/{}] Batch [{}/{}] Loss: {:.4f} Semantic_Loss: {:.4f} Attention_Loss: {:.4f} Semantic_Top@1: {:.4f} Attention_Top@1: {:.4f}'.format(
@@ -86,11 +89,14 @@ def validate_SCG(model, test_loader, criterion):
             # calculate output 
             pred, pred_att = model(data)
 
-            # ensemble 
+            # ensemble and get accuracy 
+            target = target.reshape ([batch, crop,-1])
+            target = target.mean(dim=1)
             pred_logits     = softmax(pred.reshape([batch,crop,-1]))
             pred_att_logits = softmax(pred_att.reshape([batch,crop,-1]))
             pred_logits     = pred_logits.mean(dim=1).squeeze(1)
             pred_att_logits = pred_att_logits.mean(dim=1).squeeze(1)
+            
             sem_prec1, _    = accuracy(pred.data, target, topk=(1, 5))
             att_prec1, _    = accuracy(pred_att.data, target, topk=(1, 5))
 
@@ -100,11 +106,11 @@ def validate_SCG(model, test_loader, criterion):
             sem_prec1, _ = accuracy(pred.data, target, topk=(1, 5))
             att_prec1, _ = accuracy(pred_att.data, target, topk=(1, 5))
 
-            semantic_loss.update(loss_pred.item(), batch*crop)
-            attention_loss.update(loss_att.item(), batch*crop)
-            semantic_top1.update(sem_prec1.item(), batch*crop)
-            attention_top1.update(att_prec1.item(), batch*crop)
-            eval_loss.update(loss.item(),batch*crop)
+            semantic_loss.update(loss_pred.item(), batch)
+            attention_loss.update(loss_att.item(), batch)
+            semantic_top1.update(sem_prec1.item(), batch)
+            attention_top1.update(att_prec1.item(), batch)
+            eval_loss.update(loss.item(),batch)
 
     print('Test Result : Loss: {:.4f} Semantic_Loss: {:.4f} Attention_Loss: {:.4f} Semantic_Top@1: {:.4f} Attention_Top@1: {:.4f}'.format(
         loss.item(), loss_pred.item(), loss_att.item(), sem_prec1.item(), att_prec1.item()))
