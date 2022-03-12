@@ -48,6 +48,7 @@ def process_stanford40_bm():
   body_actions = ['climbing', 'jumping','cleaning_the_floor','riding_a_bike','riding_a_horse',
                   'rowing_a_boat','running','walking_the_doc','shooting_an_arrow','throwing_frisby',
                   'waving_hands']
+                  
   for lbl_num, act in enumerate(actions):
     # load train list 
     train_list = load_txt_from_path('./ImageSplits/'+act+'_train.txt')
