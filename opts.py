@@ -10,7 +10,7 @@ parser.add_argument('--pretrained', type=bool, default=True)
 # ========================= Learning Configs ==========================
 parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run')
-parser.add_argument('--batch-size', default=2, type=int,
+parser.add_argument('--batch-size', default=1, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--lr', '--learning-rate', default=3*(10**-6), type=float,
                     metavar='LR', help='initial learning rate')

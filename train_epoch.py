@@ -11,35 +11,36 @@ def train_SCG(model, train_loader, criterion, optimizer):
     attention_loss = AverageMeter()
     train_loss     = AverageMeter()
 
+    softmax = torch.nn.Softmax(dim=1)
+
     for batch_idx, (data, target) in enumerate(train_loader):
         
         # ten-crop: reordering batch-wise
         batch,crop,chan,w,h = data.shape
         data = data.reshape([batch*crop,chan,w,h])
-        print("reshaped data", data.shape)
+
         # device check
-        if torch.cuda.is_available():
-            data   = data.cuda()
-            target = target.cuda()
+        #if torch.cuda.is_available():
+        #    data   = data.cuda()
+        #    target = target.cuda()
         
         optimizer.zero_grad()
 
         # calculate output 
         pred, pred_att = model(data)
 
-        # ensemble 
-        _, num_label = pred.shape
-        pred     = pred.reshape([batch,crop,num_label])
-        pred_att = pred_att.reshape([batch,crop,num_label])
-
-        pred = torch.mean(pred, dim=1)
-        pred_att = torch.mean(pred_att,dim=1)
-        
+        # get loss 
         loss_pred = criterion(pred, target)
         loss_att  = criterion(pred_att, target)
         loss = loss_pred + loss_att
-        sem_prec1, _ = accuracy(pred.data, target, topk=(1, 5))
-        att_prec1, _ = accuracy(pred_att.data, target, topk=(1, 5))
+
+        # ensemble and get accuracy 
+        pred_logits     = softmax(pred.reshape([batch,crop,-1]))
+        pred_att_logits = softmax(pred_att.reshape([batch,crop,-1]))
+        pred_logits     = pred_logits.mean(dim=1).squeeze(1)
+        pred_att_logits = pred_att_logits.mean(dim=1).squeeze(1)
+        sem_prec1, _    = accuracy(pred.data, target, topk=(1, 5))
+        att_prec1, _    = accuracy(pred_att.data, target, topk=(1, 5))
         
         loss.backward()
         optimizer.step()
@@ -82,11 +83,12 @@ def validate_SCG(model, test_loader, criterion):
             pred, pred_att = model(data)
 
             # ensemble 
-            _, num_label = pred.shape
-            pred     = pred.reshape([batch,crop,num_label])
-            pred_att = pred_att.reshape([batch,crop,num_label])
-            pred = pred.mean(dim=1).squeeze(1)
-            pred_att = pred.mean(dim=1).squeeze(1)
+            pred_logits     = softmax(pred.reshape([batch,crop,-1]))
+            pred_att_logits = softmax(pred_att.reshape([batch,crop,-1]))
+            pred_logits     = pred_logits.mean(dim=1).squeeze(1)
+            pred_att_logits = pred_att_logits.mean(dim=1).squeeze(1)
+            sem_prec1, _    = accuracy(pred.data, target, topk=(1, 5))
+            att_prec1, _    = accuracy(pred_att.data, target, topk=(1, 5))
 
             loss_pred = criterion(pred, target)
             loss_att  = criterion(pred_att, target)

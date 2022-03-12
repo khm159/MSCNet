@@ -1,12 +1,14 @@
 import torch
 import tensorboard_logger 
+from opts import parser
+import os 
 
-from train_epoch import train_SCG
+from train_epoch import train_SCG, validate_SCG
 from utils import get_dataset_info, \
 get_loaders, get_augmentor_SCG, check_dirs_SCG
-from opts import parser
 
 from models.SCG import SCG
+from test import test
 
 def main_worker():
     """
@@ -56,6 +58,7 @@ def main_worker():
     # --> firstly train the Attention Model. 
 
     num_epoch = 100
+    best_score = 0.0
     for epoch in range(num_epoch):
         print(" train {} epoch".format(epoch))
         # train epoch 
@@ -71,8 +74,31 @@ def main_worker():
             criterion = criterion
         )
         # save checkpoint... 
-    
+        cur_path = 'model.ckpt.pth'
+        cur_path = os.path.join(ckptdir, cur_path)
+        state_dict = {
+            'state_dict': scg_model.state_dict(),
+            'val_top1': val_top1.avg,
+            'epoch': epoch,
+            'optimizer': optimizer.state_dict(),
+            'opt': opt
+        }
+        torch.save(scg_model.state_dict(), cur_path)
+        if val_top1.avg > best_score:
+            best_score = val_top1.avg
+            torch.save(
+                state_dict, 
+                os.path.join(
+                    ckptdir,
+                    'best_model.ckpt.pth'
+                )
+            )
+
     # calculate mAP 
+    print(" Training Finished!")
+    print(" - Best Validation Score: {:.2f}%".format(best_score))
+    print(" Calculate Precision...")
+    test(scg_model,opt.dataset)
 
 if __name__ == "__main__":
     main_worker()
