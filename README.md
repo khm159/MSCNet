@@ -8,6 +8,9 @@ from the "Human action recognition by multiple spatial clues network", neurocomp
 
 I implemented this model for practicing. 
 
+This repo is not completed yet.
+
+
 Requirements
 ------------------------
 - pytorch 1.7
